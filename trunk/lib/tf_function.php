@@ -49,8 +49,8 @@ if (!function_exists('opictf_icon_logo')) {
 
 }
 
-if (!function_exists('opic_cat_flags')) {
-	function opic_cat_flags($slug, $attr = array('width'=>'30px')) {
+if (!function_exists('opic_tf_cat_flags')) {
+	function opic_tf_cat_flags($slug, $attr = array('width'=>'30px')) {
 		global $tfcategories;
 		$_attr = NULL;
 		if (!empty($attr) && is_array($attr)) {
@@ -77,11 +77,12 @@ if (!function_exists('set_value')) {
 
 }
 
-if (!function_exists('opic_get_data')) {
-	function opic_get_data($url = NULL) {
+if (!function_exists('opic_tf_get_data')) {
+	function opic_tf_get_data($url = NULL) {
 
-		if ($url) {
-			return @file_get_contents($url);
+		$response = wp_remote_get($url,[ 'timeout' => 5000, 'httpversion' => '1.1','sslverify' => false]);
+		if ( is_array( $response ) && ! is_wp_error( $response ) && !empty($response['body']) ) {
+			return json_decode($response['body']);
 		}
 		return;
 	}

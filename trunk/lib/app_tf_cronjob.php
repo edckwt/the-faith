@@ -1,11 +1,43 @@
 <?php
 
 class app_tf_cronjob extends app_tf_models {
+    public $pageCountKey ;
+    public $curncyPageKey ;
+    public $perPageCount = 20;
 
 	function __construct() {
 		parent::__construct();
-
+		$this->pageCountKey =  get_option(OPICTF_Input_SLUG.'language')."-api-the-faith-p-count-";
+		$this->curncyPageKey =  get_option(OPICTF_Input_SLUG.'language')."-api-the-faith-curency-page-";
 	}
+	public function steTransientKeys($slug)
+	{
+		$this->pageCountKey = $this->pageCountKey.$slug."-";
+		$this->curncyPageKey = $this->curncyPageKey.$slug."-";
+	}
+    private function getCache($key)
+    {
+        $data =  get_transient( $key );
+        if($data !== false)
+        {
+            return (int) $data;   
+        }
+        return set_transient( $key, 1);
+    }
+    private function setCache($key, $value)
+    {
+         return set_transient( $key, $value);
+    }
+    private function incresCurnacrpage($categoryId){
+
+            $oldValue = get_transient($this->curncyPageKey.$categoryId);
+            $incress = ($oldValue+1);
+            return set_transient( $this->curncyPageKey.$categoryId, $incress);
+    }
+    private function resteCache($id = 6){
+        set_transient( $this->curncyPageKey.$id,0);
+        set_transient( $this->pageCountKey.$id,0);
+    }
 
 	public function CategoryBySlug() {
 		return $this -> getCategoryBySlug();
@@ -18,8 +50,58 @@ class app_tf_cronjob extends app_tf_models {
 		if (is_array($list)) {
 			foreach ($list as $key => $value) {
 				foreach ($value['import_url'] as $key => $_value) {
-					$GetData = $this->getData($_value);
-					$array[$value['option_slug']][] = $GetData;
+					$GetData = $this->getData($_value.'&count='.$this->perPageCount);
+					if(isset($GetData->status ) && $GetData->status == "ok")
+					{
+					     $categoryId = $GetData->category->id;
+						//$this->resteCache($categoryId);
+						// set or get page count
+    					$allPageCount = $this->getCache($this->pageCountKey.$categoryId);
+    					$pageCount = (int) $GetData->pages;
+    					
+    					// get curancr page number
+    					$curancyPage = $this->getCache($this->curncyPageKey.$categoryId);
+    					
+ 					    // if empty pr page count is greate than  page count
+    					if(empty($allPageCount) || $allPageCount <= 0 || $allPageCount < $pageCount || $allPageCount > $pageCount){
+    					    $this->setCache($this->pageCountKey.$categoryId, $pageCount);
+    					}
+    					
+    					// if curancy page > all page count reset curancy page to 1
+    					if($curancyPage > $pageCount )
+    					{
+    					    $this->setCache($this->curncyPageKey.$categoryId,1);   
+    					}
+    					// get all page count
+    					$allPageCount = $this->getCache($this->pageCountKey.$categoryId);
+    					
+    					if( $allPageCount > 0 && $curancyPage <= $allPageCount){
+    					    
+    					   // get posts from json wih page
+    					   $GetPostsData = $this->getData($_value.'&page='.$curancyPage.'&count='.$this->perPageCount);  
+    					   $array[$value['option_slug']][] = $GetPostsData;
+    					   
+        					 // stop increment page if curany Page > all pahes 
+        					if($curancyPage <= $allPageCount-1)
+        					{
+        					    // update curance page with one
+        					    $this->incresCurnacrpage($categoryId);
+        					}
+    					  
+    					}
+    					/**header('Content-Type: application/json');
+    					echo json_encode([
+    					   // "incresCurnacrpage"=>$this->incresCurnacrpage($categoryId),
+    					    "key"=> $this->curncyPageKey.$categoryId,
+    					    'categoryId' => $categoryId,
+    					    "pageCount" => $pageCount,
+    					    'allPageCount'=>$allPageCount,
+    					    'curancyPage'=>$curancyPage,
+    					    'data'=>$array,
+    					]);
+    				    die; **/
+					}
+					
 				}
 			}
 		}
@@ -28,9 +110,9 @@ class app_tf_cronjob extends app_tf_models {
 	}
 
 	public function getData($url = '') {
-		$data = @file_get_contents($url);
-		if ($data) {
-			return json_decode($data);
+	 	$response = wp_remote_get($url,[ 'timeout' => 5000, 'httpversion' => '1.1','sslverify' => false]);
+		if ( is_array( $response ) && ! is_wp_error( $response ) && !empty($response['body']) ) {
+			return json_decode($response['body']);
 		}
 		return;
 	}
@@ -49,7 +131,7 @@ class app_tf_cronjob extends app_tf_models {
 		}
 	}
 
-	public function insertTags($tags = array(), $post_ID) {
+	public function insertTags($tags = array(), $post_ID='') {
 		$tags_title = array();
 		if (!empty($tags) && is_array($tags)) {
 			foreach ($tags as $key => $value) {
@@ -76,7 +158,7 @@ class app_tf_cronjob extends app_tf_models {
 
 	}
 
-	public function InsertImage($url = '', $post_id) {
+	public function InsertImage($url = '', $post_id='') {
 		// Add Featured Image to Post
 		$image_url = $url;
 		// Define the image URL here
@@ -131,7 +213,7 @@ class app_tf_cronjob extends app_tf_models {
 				unset($value->categories);
 				unset($value->author);
 				unset($value->comments);
-				unset($value->attachments);
+				//unset($value->attachments);
 				unset($value->comment_count);
 				unset($value->comment_status);
 				unset($value->thumbnail);
@@ -152,17 +234,29 @@ class app_tf_cronjob extends app_tf_models {
 				// if found update
 				if ($post_id <= 0) {
 					//else insert 1-post  2-tage  3-meta post orginal link
-					 
-					$post_id = wp_insert_post($post,$wp_error);
-                   
-					add_post_meta($post_id, 'orginal_url', $value -> url);
-					
-	
-					
-					if (!empty($value -> thumbnail_images -> full)) {
-						$this -> InsertImage($value -> thumbnail_images -> full -> url, $post_id);
+					 try {
+    					$post_id = wp_insert_post($post);
+                        if(!is_wp_error($post_id)){
+        					add_post_meta($post_id, 'orginal_url', $value -> url);
+    
+        					if(isset($value->attachments) && !empty($value->attachments) && count($value->attachments) > 0){
+        					    
+        					    foreach($value->attachments as $img){
+        					       if(isset($img->url)){
+        					            $this -> InsertImage($img->url, $post_id);   
+        					       }
+        					       
+        					    }     
+        					    
+        					}        					
+        					if (isset($value -> thumbnail_images -> full) && !empty($value -> thumbnail_images -> full)) {
+        						$this -> InsertImage($value -> thumbnail_images -> full -> url, $post_id);
+        					}
+        					$this -> insertTags($value -> tags, $post_id);
+                        }
+					} catch (\Throwable $th) {
+
 					}
-					$this -> insertTags($value -> tags, $post_id);
 
 				}
 				unset($post);
@@ -188,7 +282,6 @@ class app_tf_cronjob extends app_tf_models {
 			foreach ($value as $cat_key => $cat_value) {
 				if (!empty($cat_value)) {
 					$cat_id = $this -> insertCategory($cat_value -> category, $parent);
-                    
 					$this -> InsertPosts($cat_value -> posts, $cat_id,$parent);
 					sleep(1);
 				}
@@ -224,7 +317,7 @@ class app_tf_cronjob extends app_tf_models {
 }
 
 $opic_tf_cronjob = new app_tf_cronjob();
-/*$opic_tf_cronjob->InsetPost();
-die;*/
+//$opic_tf_cronjob->InsetPost();
+//die;
 
 ?>

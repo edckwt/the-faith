@@ -1,12 +1,17 @@
 <?php
 /**
-Plugin Name: Islamic Content Archive For The Faith
-Plugin URI: http://www.the-faith.com/
-Description: The Faith introduces Islam to non-Muslims. It provides information about the Quran, Prophet Muhammad, and Islamic civilization.
-Version: 1.1
-Author: EDC Team (E-Da`wah Committee)
-Author URI: http://www.islam.com.kw/
-License: Free
+ * Islamic Content Archive For The Faith
+ *
+ * Plugin Name: Islamic Content Archive For The Faith
+ * Plugin URI:  https://wordpress.org/plugins/islamic-content-archive-for-the-faith/
+ * Description: The Faith introduces Islam to non-Muslims. It provides information about the Quran, Prophet Muhammad, and Islamic civilization.
+ * Version:     1.3.7
+ * Author:      EDC TEAM (E-Dawah Committee)
+ * Author URI:  https://edc.org.kw
+ * License:     GPLv2 or later
+ * License URI: http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Requires at least: 5.0
+ * Requires PHP: 7.4
 */
 
 define('OPICTF_PLUGIN_PATH',plugin_dir_path( __FILE__ ));
@@ -48,7 +53,7 @@ function OPICTF_plugin_uninstall(){
 		delete_option(OPICTF_Input_SLUG.'version');
 	}
 }
-register_activation_hook(plugin_basename(__FILE__),'OPICTF_plugin_install'); 
+register_activation_hook(plugin_basename(__FILE__),'OPICTF_plugin_install');
 register_deactivation_hook(plugin_basename(__FILE__), 'OPICTF_plugin_uninstall');
 
 function thefaith_settings_link( $links ) {
@@ -57,7 +62,7 @@ function thefaith_settings_link( $links ) {
     array_unshift( $links, $settings_link );
     return $links;
 }
- 
+
 function thefaith_after_setup_theme() {
      add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'thefaith_settings_link');
 }

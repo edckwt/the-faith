@@ -30,7 +30,7 @@ class TheFaithMaincontroller extends app_tf_controlers {
 				echo $this->loadController('categories');
 				break;
 			default:
-				$this->loadController('options');
+				$this->loadController('language');
 				break;
 		}
 	}

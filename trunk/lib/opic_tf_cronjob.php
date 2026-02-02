@@ -86,7 +86,7 @@ if(!function_exists('my_tf_repeat_function')){
 	
 function my_tf_repeat_function() {
 	
-	global $opictf_cronjob;
+	global $opic_tf_cronjob;
 	$opic_tf_cronjob -> InsetPost();
 }
 }

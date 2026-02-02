@@ -1,10 +1,10 @@
 === Islamic Content Archive For The Faith ===
 Contributors: EDC Team
-Donate link: http://www.edc.org.kw
+Donate link: https://edc.org.kw
 Tags: introduction to islam, introducing islam, presenting islam, islam in brief, islam in focu, what is islam, islam and muslims, mutual understanding, interfaith dialogue, what is the quran, islam and politics, family in islam,islam and environment, islam and democracy, Islam, Islamic, Archive, Islamic, EDC
-Requires at least: 3.0
-Tested up to: 4.9.1
-Stable tag: 1.1
+Requires at least: 5.0
+Tested up to: 6.5.3
+Stable tag: 1.3.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,11 +16,11 @@ The Faith introduces Islam to non-Muslims. It provides information about the Qur
 
 Features:
 
-* Get the content (articles, videos, audios) of [The Faith](http://www.the-faith.com).
+* Get the content (articles, videos, audios) of [The Faith](https://the-faith.com).
 * Using Json API
 * Using Cron Job.
 
-PS: All the websites owned by EDC [(E-Da`wah Committee)](http://www.edc.org.kw), For Support click to [Islam.com.kw](http://www.islam.com.kw/).
+PS: All the websites owned by EDC [(E-Dawah Committee)](https://edc.org.kw), For Support click to [Islam.com.kw](https://islam.com.kw/).
 
 == Installation ==
 
@@ -34,11 +34,33 @@ PS: All the websites owned by EDC [(E-Da`wah Committee)](http://www.edc.org.kw),
 1. Show Categoreis
 
 == Changelog ==
+= 1.3.7 =
+* Update: Functions.
+
+= 1.3.6 =
+* fixed errors
+
+= 1.3.5 =
+* fixed :Cron job get data.
+
+= 1.3.3 =
+* Update: import all Attachments.
+
+= 1.3.1 =
+* Update: Functions.
+* fixed get data error and using function wp_remote_get
+* Update: cronjob functions
+
+= 1.3 =
+* Update: Functions.
+* Update: url
+* Update: cronjob functions
+
+= 1.2 =
+* Update: Functions.
 
 = 1.1 =
-
 * Update: Functions.
 
 = 1.0 =
-
 * Added: it is new plugin.
